@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int          @id @default(autoincrement())
+  email        String       @unique
+  googleUid    String       @unique
+  crush        String?  
+  name         String
+  matched      Boolean       @default(false)
+  questionsAnswered      Boolean       @default(false)
+  gender       Gender
+  answers      UserAnswer[]
+  matchedWith  User?         @relation("UserMatch", fields: [matchedWithId], references: [id])
+  matchedWithId Int?         // Foreign key for the matched user
+  matchedBy    User[]        @relation("UserMatch") // Opposite side of the self-referencing relation
+}
+
+model UserAnswer {
+  id             Int    @id @default(autoincrement())
+  userId         Int    // Foreign key to User
+  questionNumber Int    // Question number
+  answer         String // The answer selected by the user
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, questionNumber]) // Ensure no duplicate answers per question for the same user
+}
+
+enum Gender {
+  male
+  female
+}
