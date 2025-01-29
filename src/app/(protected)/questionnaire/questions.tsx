@@ -1,82 +1,91 @@
-"use client"
+"use client";
 
-import { toast } from "@/hooks/use-toast"
-import { firebaseApp } from "@/utils/firebase"
-import { findUserByUid, ifUserAnsweredQuestions, marksQuestionsAnswered, saveAnswer } from "@/utils/userFunctions"
-import { getAuth } from "firebase/auth"
-import { AnimatePresence, motion } from "framer-motion"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { Loader2 } from "lucide-react"
+import { toast } from "@/hooks/use-toast";
+import { firebaseApp } from "@/utils/firebase";
+import {
+  findUserByUid,
+  ifUserAnsweredQuestions,
+  marksQuestionsAnswered,
+  saveAnswer,
+} from "@/utils/userFunctions";
+import { getAuth } from "firebase/auth";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function Questionnaire() {
-  const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [answers, setAnswers] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const router = useRouter()
-  const auth = getAuth(firebaseApp)
-  const uid = auth.currentUser!.uid!
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+  const auth = getAuth(firebaseApp);
+  const uid = auth.currentUser!.uid!;
 
   useEffect(() => {
     const checkRedirection = async () => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        const user = await findUserByUid(uid)
-        if(!user || !user.id) router.push("/results")
-        const redirect = await ifUserAnsweredQuestions(user!.id!)
+        const user = await findUserByUid(uid);
+        if (!user || !user.id) {
+          router.push("/profile-setup");
+          return;
+        }
+        const redirect = await ifUserAnsweredQuestions(user!.id!);
         if (redirect) {
-          router.push("/results")
+          router.push("/results");
         }
       } catch (error) {
-        console.error("Error in redirection check:", error)
+        console.error("Error in redirection check:", error);
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to load your questionnaire status. Please try again.",
-        })
+          description:
+            "Failed to load your questionnaire status. Please try again.",
+        });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    if (auth) checkRedirection()
-  }, [auth, router, uid])
+    if (auth) checkRedirection();
+  }, [auth, router, uid]);
 
   const handleAnswer = async (answer: string) => {
     try {
-      const newAnswers = [...answers, answer]
-      setAnswers(newAnswers)
+      const newAnswers = [...answers, answer];
+      setAnswers(newAnswers);
 
       if (currentQuestion < questions.length - 1) {
-        setCurrentQuestion(currentQuestion + 1)
+        setCurrentQuestion(currentQuestion + 1);
       } else {
-        setIsSubmitting(true)
-        const contextUser = await findUserByUid(uid)
+        setIsSubmitting(true);
+        const contextUser = await findUserByUid(uid);
 
         for (const [index, answer] of newAnswers.entries()) {
-          await saveAnswer(contextUser!.id!, index + 1, answer)
+          await saveAnswer(contextUser!.id!, index + 1, answer);
         }
-        await marksQuestionsAnswered(contextUser!.id!)
+        await marksQuestionsAnswered(contextUser!.id!);
         toast({
           variant: "default",
           title: "Your answers reached us",
           description: "Be patient! and wait for your match",
-        })
-        router.push("/results")
+        });
+        router.push("/results");
       }
     } catch (error) {
       toast({
         variant: "destructive",
         title: (error as Error).message || "Backend is down",
         description: "Please try again later",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
-  const progress = ((currentQuestion + 1) / questions.length) * 100
+  const progress = ((currentQuestion + 1) / questions.length) * 100;
 
   if (isLoading) {
     return (
@@ -91,7 +100,7 @@ export default function Questionnaire() {
           Loading Questionnaire...
         </motion.div>
       </div>
-    )
+    );
   }
 
   return (
@@ -107,17 +116,31 @@ export default function Questionnaire() {
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 260, damping: 20 }}
+              transition={{
+                delay: 0.2,
+                type: "spring",
+                stiffness: 260,
+                damping: 20,
+              }}
               className="absolute -top-10 -right-10 w-40 h-40 bg-pink-400 rounded-full opacity-50"
             />
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.3, type: "spring", stiffness: 260, damping: 20 }}
+              transition={{
+                delay: 0.3,
+                type: "spring",
+                stiffness: 260,
+                damping: 20,
+              }}
               className="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-400 rounded-full opacity-50"
             />
-            <h1 className="text-3xl font-bold text-center relative z-10">Prom Matchmaking Questionnaire</h1>
-            <p className="text-center mt-2 text-purple-200 relative z-10">Help us find your perfect match!</p>
+            <h1 className="text-3xl font-bold text-center relative z-10">
+              Prom Matchmaking Questionnaire
+            </h1>
+            <p className="text-center mt-2 text-purple-200 relative z-10">
+              Help us find your perfect match!
+            </p>
           </div>
           <div className="p-8">
             <div className="mb-6">
@@ -142,7 +165,9 @@ export default function Questionnaire() {
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
               >
-                <h2 className="text-2xl font-semibold mb-4">{questions[currentQuestion].question}</h2>
+                <h2 className="text-2xl font-semibold mb-4">
+                  {questions[currentQuestion].question}
+                </h2>
                 <div className="space-y-4">
                   {questions[currentQuestion].options.map((option, index) => (
                     <motion.button
@@ -168,7 +193,7 @@ export default function Questionnaire() {
         </div>
       </motion.div>
     </div>
-  )
+  );
 }
 
 const questions = [
@@ -191,7 +216,8 @@ const questions = [
     ],
   },
   {
-    question: "If you could live anywhere in the world for a year, where would it be?",
+    question:
+      "If you could live anywhere in the world for a year, where would it be?",
     options: [
       "A beach paradise",
       "A bustling city like New York or Tokyo",
@@ -238,15 +264,11 @@ const questions = [
   },
   {
     question: "What’s your go-to comfort food?",
-    options: [
-      "Pizza",
-      "Ice cream",
-      "Chocolate",
-      "A home-cooked meal",
-    ],
+    options: ["Pizza", "Ice cream", "Chocolate", "A home-cooked meal"],
   },
   {
-    question: "Do you prefer spontaneous adventures or planning everything in advance?",
+    question:
+      "Do you prefer spontaneous adventures or planning everything in advance?",
     options: [
       "Spontaneous adventures all the way",
       "I prefer to plan things carefully",
@@ -256,12 +278,7 @@ const questions = [
   },
   {
     question: "What movie genre do you think best describes your life?",
-    options: [
-      "Comedy",
-      "Action/Adventure",
-      "Drama",
-      "Sci-Fi/Fantasy",
-    ],
+    options: ["Comedy", "Action/Adventure", "Drama", "Sci-Fi/Fantasy"],
   },
   {
     question: "If we were to watch a movie together, what would it be?",
@@ -387,7 +404,8 @@ const questions = [
     ],
   },
   {
-    question: "How do you feel about sharing passwords and accounts in a relationship?",
+    question:
+      "How do you feel about sharing passwords and accounts in a relationship?",
     options: [
       "I’m okay with it as long as there’s trust",
       "I think it should be discussed and agreed upon",
@@ -405,4 +423,3 @@ const questions = [
     ],
   },
 ];
-
