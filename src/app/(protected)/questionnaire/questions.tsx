@@ -23,7 +23,7 @@ export default function Questionnaire() {
       setIsLoading(true)
       try {
         const user = await findUserByUid(uid)
-        const redirect = await ifUserAnsweredQuestions(user!.email!)
+        const redirect = await ifUserAnsweredQuestions(user!.id!)
         if (redirect) {
           router.push("/results")
         }

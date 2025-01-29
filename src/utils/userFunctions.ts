@@ -130,10 +130,10 @@ export async function marksQuestionsAnswered(userId : number){
   })
 }
 
-export async function ifUserAnsweredQuestions(email  :string){
+export async function ifUserAnsweredQuestions(id  :number){
   const user = await db.user.findUnique({
     where:{
-      email
+      id
     }
   })
 
