@@ -7,12 +7,14 @@ import { findBestMatch, findUserByUid } from "@/utils/userFunctions"
 import { getAuth } from "firebase/auth"
 import { firebaseApp } from "@/utils/firebase"
 import confetti from "canvas-confetti"
+import { useRouter } from "next/navigation"
 
 export default function Results() {
   const [matchStatus, setMatchStatus] = useState<"loading" | "matched" | "waiting" | "error">("loading")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const auth = getAuth(firebaseApp)
   const uid = auth.currentUser!.uid!
+  const router = useRouter();
 
   useEffect(() => {
     const today = new Date()
@@ -28,6 +30,11 @@ export default function Results() {
         const user = await findUserByUid(uid)
         if (!user || !user.id) {
           throw new Error("User ID not found")
+        }
+        if(!user.questionsAnswered){
+          router.push("/questionnaire")
+          throw new Error("Kindly answer all the questions first!")
+        
         }
 
         const match = await findBestMatch(user.id)
