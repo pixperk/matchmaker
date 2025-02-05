@@ -8,6 +8,7 @@ import { getAuth } from "firebase/auth"
 import { firebaseApp } from "@/utils/firebase"
 import confetti from "canvas-confetti"
 import { useRouter } from "next/navigation"
+import { toast } from "@/hooks/use-toast"
 
 export default function Results() {
   const [matchStatus, setMatchStatus] = useState<"loading" | "matched" | "waiting" | "error">("loading")
@@ -53,6 +54,11 @@ export default function Results() {
       } catch (error) {
         setMatchStatus("error")
         setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred")
+        toast({
+          title: "Some Error Occured",
+          description: "Please check if you are already Matched.",
+          variant: "destructive",
+        });
       }
     }
 
