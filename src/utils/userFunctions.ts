@@ -51,72 +51,60 @@ export async function saveAnswer(userId: number, qno: number, answer: string) {
 
 export async function findBestMatch(userId: number) {
   try {
-    // Fetch the user and their answers
+    // Fetch the user with answers
     const user = await db.user.findUnique({
       where: { id: userId },
       include: { answers: true },
     });
 
-    if (!user) {
-      throw new Error(`User with ID ${userId} not found.`);
-    }
-
-    if (user.matched) {
+    if (!user) throw new Error(`User with ID ${userId} not found.`);
+    if (user.matchedWithId) {
       console.log("User is already matched.");
-      // Fetch the existing match details
-      return await db.user.findUnique({
-        where: { id: user.matchedWithId || undefined },
-      });
+      return db.user.findUnique({ where: { id: user.matchedWithId } });
     }
 
-    // Find users of the opposite gender who are not yet matched
+    // Fetch potential matches (opposite gender, not yet matched)
     const potentialMatches = await db.user.findMany({
-      where: {
-        gender: user.gender === "male" ? "female" : "male",
-        matched: false,
-      },
+      where: { gender: user.gender === "male" ? "female" : "male", matchedWithId: null },
       include: { answers: true },
     });
 
+    if (potentialMatches.length === 0) return null; // No available matches
+
     let bestMatch = null;
-    let highestMatchCount = 0;
+    let highestScore = 0;
 
-    // Compare answers and calculate match score
-    for (const potentialMatch of potentialMatches) {
-      const matchCount = potentialMatch.answers.reduce((count, answer) => {
-        const userAnswer = user.answers.find(
-          (ua) => ua.questionNumber === answer.questionNumber
-        );
-        return userAnswer && userAnswer.answer === answer.answer ? count + 1 : count;
-      }, 0);
+    // Convert user's answers to a Map for fast lookup
+    const userAnswersMap = new Map(user.answers.map(a => [a.questionNumber, a.answer]));
 
-      if (matchCount > highestMatchCount) {
-        highestMatchCount = matchCount;
-        bestMatch = potentialMatch;
+    // Compare with potential matches
+    for (const match of potentialMatches) {
+      let matchScore = match.answers.reduce(
+        (count, ans) => count + (userAnswersMap.get(ans.questionNumber) === ans.answer ? 1 : 0),
+        0
+      );
+
+      if (matchScore > highestScore) {
+        highestScore = matchScore;
+        bestMatch = match;
       }
     }
 
-    if (bestMatch) {
-      // Update both users as matched
-      await db.user.update({
-        where: { id: userId },
-        data: { matched: true, matchedWithId: bestMatch.id },
-      });
+    if (!bestMatch) return null; // No good match found
 
-      await db.user.update({
-        where: { id: bestMatch.id },
-        data: { matched: true, matchedWithId: userId },
-      });
+    // Update both users in a single transaction
+    await db.$transaction([
+      db.user.update({ where: { id: userId }, data: { matchedWithId: bestMatch.id } }),
+      db.user.update({ where: { id: bestMatch.id }, data: { matchedWithId: userId } }),
+    ]);
 
-      return bestMatch; // Return the best match
-    }
-
-    return null; // No match found
+    return bestMatch;
   } catch (error) {
     console.error("Error in findBestMatch:", error);
     throw error;
   }
 }
+
 
 
 export async function marksQuestionsAnswered(userId : number){
