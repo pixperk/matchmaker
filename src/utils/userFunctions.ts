@@ -79,7 +79,7 @@ export async function findBestMatch(userId: number) {
 
     // Compare with potential matches
     for (const match of potentialMatches) {
-      let matchScore = match.answers.reduce(
+      const matchScore = match.answers.reduce(
         (count, ans) => count + (userAnswersMap.get(ans.questionNumber) === ans.answer ? 1 : 0),
         0
       );
