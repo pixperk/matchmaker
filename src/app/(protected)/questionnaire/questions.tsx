@@ -56,17 +56,31 @@ export default function Questionnaire() {
     try {
       const newAnswers = [...answers, answer];
       setAnswers(newAnswers);
-
+  
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
       } else {
+        if (newAnswers.length < questions.length) {
+          toast({
+            variant: "destructive",
+            title: "Incomplete Questionnaire",
+            description: "Please answer all questions before submitting.",
+          });
+          return;
+        }
+  
         setIsSubmitting(true);
         const contextUser = await findUserByUid(uid);
-
-        for (const [index, answer] of newAnswers.entries()) {
-          await saveAnswer(contextUser!.id!, index + 1, answer);
-        }
-        await marksQuestionsAnswered(contextUser!.id!);
+        if (!contextUser) throw new Error("User not found!");
+  
+        // Use Promise.all() to save all answers in parallel
+        await Promise.all(
+          newAnswers.map((ans, idx) =>
+            saveAnswer(contextUser.id, idx + 1, ans)
+          )
+        );
+  
+        await marksQuestionsAnswered(contextUser.id);
         toast({
           variant: "default",
           title: "Your answers reached us",
@@ -84,6 +98,7 @@ export default function Questionnaire() {
       setIsSubmitting(false);
     }
   };
+  
 
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
