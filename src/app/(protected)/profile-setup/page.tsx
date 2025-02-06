@@ -59,10 +59,11 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     await login(name, gender, email, crushName,uid);
     router.push("/questionnaire")
   } catch (error) {
-  
+    console.log(error);
+    
     toast({
       title: "Profile Creation Failed",
-      description: (error as Error).message,
+      description: "User already exists",
       variant: "destructive",
     });
   }
