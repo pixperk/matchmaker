@@ -52,6 +52,19 @@ export default function Questionnaire() {
     if (auth) checkRedirection();
   }, [auth, router, uid]);
 
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (isSubmitting) {
+        event.preventDefault();
+        event.returnValue = "Your answers are being submitted. Are you sure you want to leave?";
+      }
+    };
+  
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isSubmitting]);
+  
+
   const handleAnswer = async (answer: string) => {
     try {
       const newAnswers = [...answers, answer];
@@ -200,10 +213,14 @@ export default function Questionnaire() {
               </motion.div>
             </AnimatePresence>
             {isSubmitting && (
-              <div className="mt-6 flex justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
-              </div>
-            )}
+  <div className="mt-6 flex flex-col items-center">
+    <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+    <p className="text-sm text-gray-500 mt-2">
+      Submitting your answers... Please do not close or refresh this page.
+    </p>
+  </div>
+)}
+
           </div>
         </div>
       </motion.div>
