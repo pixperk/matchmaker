@@ -25,7 +25,7 @@ export default function Results() {
     }
 
     const today = new Date()
-    const matchDay = new Date(2025, 1, 26)
+    const matchDay = new Date(2025, 1, 24)
 
     if (today < matchDay) {
       setMatchStatus("waiting")
@@ -78,7 +78,7 @@ export default function Results() {
     },
     waiting: {
       title: "Coming Soon",
-      description: "Your match will be revealed on February 27, 2025. Get ready for an exciting prom season!",
+      description: "Your match will be revealed on February 24, 2025. Get ready for an exciting prom season!",
       buttonText: "Go to Dashboard",
     },
     error: {
