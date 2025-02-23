@@ -66,7 +66,7 @@ export function Navbar() {
               <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>
           ) : (
-            <Link href="/login" className="hover:text-purple-200 transition duration-200 flex items-center">
+            <Link href="/" className="hover:text-purple-200 transition duration-200 flex items-center">
               <UserIcon className="w-4 h-4 mr-2" /> Login
             </Link>
           )}
