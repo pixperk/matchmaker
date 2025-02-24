@@ -115,6 +115,23 @@ export default function Questionnaire() {
 
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
+  const now = new Date();
+  // Note: Months are zero-indexed. Here, February is represented by 1.
+  // Registrations are allowed until February 24; on February 25 registrations end.
+  const cutoffDate = new Date(2025, 1, 25);
+  if (now >= cutoffDate) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <div className="bg-white rounded-lg shadow-xl p-8 text-center">
+          <h1 className="text-2xl font-bold mb-4">Registrations Ended</h1>
+          <p className="text-gray-700">
+            Registrations for matchmaking have ended.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-400 to-purple-600">

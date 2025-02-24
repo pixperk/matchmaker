@@ -10,65 +10,76 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ProfileSetup() {
- 
-  const [email, setEmail] = useState("")
-  const [gender, setGender] = useState<Gender | null>(null)
-  const [hasCrush, setHasCrush] = useState<boolean | null>(null)
-  const [crushName, setCrushName] = useState("")
-  const [error, setError] = useState("")
-  const router = useRouter()
-  const auth = getAuth(firebaseApp)
-  const name = auth.currentUser!.displayName!
-  const uid = auth.currentUser!.uid!
- 
- useEffect(()=>{
-  console.log(name);
-  
+  // Check the current date against the cutoff date.
+  const now = new Date();
+  // Note: Months are zero-indexed in JavaScript (0 = January, 1 = February, etc.).
+  // Here, February 25, 2025 marks the first day when registrations have ended.
+  const cutoffDate = new Date(2025, 1, 24);
+
+  if (now >= cutoffDate) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <div className="bg-white rounded-lg shadow-xl p-8 text-center">
+          <h1 className="text-2xl font-bold mb-4">Registrations Ended</h1>
+          <p className="text-gray-700">
+            Registrations for matchmaking have ended.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const [email, setEmail] = useState("");
+  const [gender, setGender] = useState<Gender | null>(null);
+  const [hasCrush, setHasCrush] = useState<boolean | null>(null);
+  const [crushName, setCrushName] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
+  const auth = getAuth(firebaseApp);
+  const name = auth.currentUser!.displayName!;
+  const uid = auth.currentUser!.uid!;
+
+  useEffect(() => {
+    console.log(name);
     async function checkIfUserExists() {
-      if( await findUserByUid(uid))  router.push("/questionnaire")
+      if (await findUserByUid(uid)) router.push("/questionnaire");
     }
-    checkIfUserExists()
- },[auth, router, uid])
+    checkIfUserExists();
+  }, [auth, router, uid, name]);
 
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError("");
 
+    if (!gender) {
+      setError("Please select your gender");
+      return;
+    }
+    if (!email.endsWith("learner.manipal.edu")) {
+      toast({
+        title: "Invalid Email",
+        description: "Please use your Manipal University learner email.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (hasCrush && !crushName.trim()) {
+      setError("Please enter your crush's name");
+      return;
+    }
 
-
-
-async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-  e.preventDefault();
-  setError("");
-
-  if (!gender) {
-    setError("Please select your gender");
-    return;
+    try {
+      await login(name, gender, email, crushName, uid);
+      router.push("/questionnaire");
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Profile Creation Failed",
+        description: "User already exists",
+        variant: "destructive",
+      });
+    }
   }
-  if (!email.endsWith("learner.manipal.edu")) {
-    toast({
-      title: "Invalid Email",
-      description: "Please use your Manipal University learner email.",
-      variant: "destructive",
-    });
-    return;
-  }
-  if (hasCrush && !crushName.trim()) {
-    setError("Please enter your crush's name");
-    return;
-  }
-
-  try {
-    await login(name, gender, email, crushName,uid);
-    router.push("/questionnaire")
-  } catch (error) {
-    console.log(error);
-    
-    toast({
-      title: "Profile Creation Failed",
-      description: "User already exists",
-      variant: "destructive",
-    });
-  }
-}
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-400 to-purple-600 p-4">
@@ -141,8 +152,8 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
                     value="no"
                     checked={hasCrush === false}
                     onChange={() => {
-                      setHasCrush(false)
-                      setCrushName("")
+                      setHasCrush(false);
+                      setCrushName("");
                     }}
                     className="form-radio h-5 w-5 text-purple-600 transition duration-150 ease-in-out"
                   />
@@ -182,5 +193,5 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         </div>
       </motion.div>
     </div>
-  )
+  );
 }
