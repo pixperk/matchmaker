@@ -25,7 +25,7 @@ export default function Results() {
     }
 
     const today = new Date()
-    const matchDay = new Date(2025, 1, 24)
+    const matchDay = new Date(2025, 1, 27)
 
     if (today < matchDay) {
       setMatchStatus("waiting")
