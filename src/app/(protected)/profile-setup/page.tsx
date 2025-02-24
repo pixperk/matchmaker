@@ -10,24 +10,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ProfileSetup() {
-  // Check the current date against the cutoff date.
-  const now = new Date();
-  // Note: Months are zero-indexed in JavaScript (0 = January, 1 = February, etc.).
-  // Here, February 25, 2025 marks the first day when registrations have ended.
-  const cutoffDate = new Date(2025, 1, 24);
-
-  if (now >= cutoffDate) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-        <div className="bg-white rounded-lg shadow-xl p-8 text-center">
-          <h1 className="text-2xl font-bold mb-4">Registrations Ended</h1>
-          <p className="text-gray-700">
-            Registrations for matchmaking have ended.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  
 
   const [email, setEmail] = useState("");
   const [gender, setGender] = useState<Gender | null>(null);
@@ -79,6 +62,25 @@ export default function ProfileSetup() {
         variant: "destructive",
       });
     }
+  }
+
+  // Check the current date against the cutoff date.
+  const now = new Date();
+  // Note: Months are zero-indexed in JavaScript (0 = January, 1 = February, etc.).
+  // Here, February 25, 2025 marks the first day when registrations have ended.
+  const cutoffDate = new Date(2025, 1, 24);
+
+  if (now >= cutoffDate) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <div className="bg-white rounded-lg shadow-xl p-8 text-center">
+          <h1 className="text-2xl font-bold mb-4">Registrations Ended</h1>
+          <p className="text-gray-700">
+            Registrations for matchmaking have ended.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

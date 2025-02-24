@@ -118,7 +118,7 @@ export default function Questionnaire() {
   const now = new Date();
   // Note: Months are zero-indexed. Here, February is represented by 1.
   // Registrations are allowed until February 24; on February 25 registrations end.
-  const cutoffDate = new Date(2025, 1, 25);
+  const cutoffDate = new Date(2025, 1, 24);
   if (now >= cutoffDate) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
