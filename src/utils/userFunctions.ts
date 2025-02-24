@@ -88,14 +88,15 @@ export async function findBestMatch(userId: number) {
         highestScore = matchScore;
         bestMatch = match;
       }
+      
     }
 
     if (!bestMatch) return null; // No good match found
 
     // Update both users in a single transaction
     await db.$transaction([
-      db.user.update({ where: { id: userId }, data: { matchedWithId: bestMatch.id } }),
-      db.user.update({ where: { id: bestMatch.id }, data: { matchedWithId: userId } }),
+      db.user.update({ where: { id: userId }, data: { matchedWithId: bestMatch.id, matched : true } }),
+      db.user.update({ where: { id: bestMatch.id }, data: { matchedWithId: userId, matched : true } }),
     ]);
 
     return bestMatch;
