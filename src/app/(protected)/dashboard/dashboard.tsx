@@ -227,20 +227,8 @@ export default function Dashboard() {
                       transition={{ duration: 0.5 }}
                     >
                       <p className="text-green-600 mb-4 flex items-center">
-                        <Sparkles className="mr-2" /> Congratulations! You have a match!
+                        <Sparkles className="mr-2" /> Congratulations! Your match details will be announced soon.
                       </p>
-                      <Card className="bg-gradient-to-r from-pink-100 to-purple-100">
-                        <CardContent className="p-4">
-                          <p className="flex items-center">
-                            <User className="mr-2 h-4 w-4 text-purple-500" />
-                            <strong>Name:</strong> {userData.matchedWith?.name}
-                          </p>
-                          <p className="flex items-center mt-2">
-                            <Mail className="mr-2 h-4 w-4 text-purple-500" />
-                            <strong>Email:</strong> {userData.matchedWith?.email}
-                          </p>
-                        </CardContent>
-                      </Card>
                     </motion.div>
                   ) : (
                     <motion.div

@@ -72,9 +72,9 @@ export default function Results() {
       buttonText: "Please Wait",
     },
     matched: {
-      title: "It&apos;s a Match!",
-      description: "Great news! We&apos;ve found a perfect match for you. Check your dashboard for more details!",
-      buttonText: "View Your Match",
+      title: "Matched!",
+      description: "You are matched.",
+      buttonText: "Go to Dashboard",
     },
     waiting: {
       title: "Coming Soon",
